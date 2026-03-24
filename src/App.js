@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const START = new Date("2025-09-01T08:00:00");
 const ENDS = {
@@ -233,6 +234,7 @@ export default function SchoolYearProgress() {
         </div>
 
       </div>
+      <SpeedInsights />
     </div>
   );
 }

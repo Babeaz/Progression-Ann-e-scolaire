@@ -1,30 +1,29 @@
 import { useEffect, useState, useCallback } from "react";
 
 const START = new Date("2025-09-01T08:00:00");
-const END   = new Date("2026-07-04T00:00:00");
+const ENDS = {
+  college: new Date("2026-07-04T00:00:00"),
+  lycee:   new Date("2026-06-05T18:00:00"),
+};
 
-// Dates officielles Education Nationale 2025-2026
 const ZONES = {
   A: [
     { label: "Toussaint", debut: new Date("2025-10-18"), fin: new Date("2025-11-03"), color: "#EF9F27" },
     { label: "Noël",      debut: new Date("2025-12-20"), fin: new Date("2026-01-05"), color: "#378ADD" },
     { label: "Hiver",     debut: new Date("2026-02-14"), fin: new Date("2026-03-02"), color: "#5DCAA5" },
     { label: "Printemps", debut: new Date("2026-04-04"), fin: new Date("2026-04-20"), color: "#D4537E" },
-    { label: "Été 🎉",    debut: new Date("2026-07-04"), fin: new Date("2026-07-04"), color: "#534AB7" },
   ],
   B: [
     { label: "Toussaint", debut: new Date("2025-10-18"), fin: new Date("2025-11-03"), color: "#EF9F27" },
     { label: "Noël",      debut: new Date("2025-12-20"), fin: new Date("2026-01-05"), color: "#378ADD" },
     { label: "Hiver",     debut: new Date("2026-02-21"), fin: new Date("2026-03-09"), color: "#5DCAA5" },
     { label: "Printemps", debut: new Date("2026-04-11"), fin: new Date("2026-04-27"), color: "#D4537E" },
-    { label: "Été 🎉",    debut: new Date("2026-07-04"), fin: new Date("2026-07-04"), color: "#534AB7" },
   ],
   C: [
     { label: "Toussaint", debut: new Date("2025-10-18"), fin: new Date("2025-11-03"), color: "#EF9F27" },
     { label: "Noël",      debut: new Date("2025-12-20"), fin: new Date("2026-01-05"), color: "#378ADD" },
     { label: "Hiver",     debut: new Date("2026-02-07"), fin: new Date("2026-02-23"), color: "#5DCAA5" },
     { label: "Printemps", debut: new Date("2026-04-18"), fin: new Date("2026-05-04"), color: "#D4537E" },
-    { label: "Été 🎉",    debut: new Date("2026-07-04"), fin: new Date("2026-07-04"), color: "#534AB7" },
   ],
 };
 
@@ -52,7 +51,8 @@ function getMsg(pct) {
   return "";
 }
 
-function toPos(date) {
+function toPos(date, mode) {
+  const END = ENDS[mode];
   return Math.min(Math.max(((date - START) / (END - START)) * 100, 0), 100);
 }
 
@@ -74,6 +74,7 @@ function getNextVac(now, zone) {
 }
 
 export default function SchoolYearProgress() {
+  const [mode, setMode] = useState("college");
   const [zone, setZone] = useState("A");
   const [pct, setPct]   = useState(0);
   const [time, setTime] = useState({ j: 0, h: "00", m: "00", s: "00" });
@@ -81,6 +82,7 @@ export default function SchoolYearProgress() {
 
   const update = useCallback(() => {
     const now = new Date();
+    const END = ENDS[mode];
     const percent = Math.min(Math.max(((now - START) / (END - START)) * 100, 0), 100);
     setPct(percent);
     const rem = Math.max(END - now, 0);
@@ -91,7 +93,7 @@ export default function SchoolYearProgress() {
       s: String(Math.floor((rem / 1000) % 60)).padStart(2, "0"),
     });
     setNext(getNextVac(now, zone));
-  }, [zone]);
+  }, [mode, zone]);
 
   useEffect(() => {
     update();
@@ -99,7 +101,7 @@ export default function SchoolYearProgress() {
     return () => clearInterval(interval);
   }, [update]);
 
-  const nowPos = toPos(new Date());
+  const nowPos = toPos(new Date(), mode);
   const vacances = ZONES[zone];
 
   return (
@@ -110,6 +112,22 @@ export default function SchoolYearProgress() {
       <div style={{ ...styles.blob, width:"40%", height:"40%", bottom:"10%", left:"15%", background:"radial-gradient(ellipse,rgba(212,83,126,0.5) 0%,transparent 70%)" }} />
 
       <div style={styles.card}>
+
+        {/* Mode switcher collège / lycée */}
+        <div style={styles.modeSwitcher}>
+          {[
+            { key: "college", label: "🎒 Collège" },
+            { key: "lycee",   label: "🎓 Lycée" },
+          ].map(({ key, label }) => (
+            <div
+              key={key}
+              onClick={() => setMode(key)}
+              style={{ ...styles.modeOpt, ...(mode === key ? styles.modeOptActive : {}) }}
+            >
+              {label}
+            </div>
+          ))}
+        </div>
 
         {/* Header avec sélecteur de zone */}
         <div style={styles.cardHeader}>
@@ -134,7 +152,7 @@ export default function SchoolYearProgress() {
           <div style={{ ...styles.fill, width: pct.toFixed(2) + "%", background: getColor(pct) }} />
         </div>
         <p style={styles.pct}>{pct.toFixed(4)} %</p>
-        <p style={styles.pctSub}>de l'année écoulée</p>
+        <p style={styles.pctSub}>{mode === "lycee" ? "des cours écoulés" : "de l'année écoulée"}</p>
 
         {/* Countdown */}
         <div style={styles.countdown}>
@@ -156,9 +174,9 @@ export default function SchoolYearProgress() {
           <p style={styles.secTitle}>Timeline de l'année</p>
           <div style={styles.timeline}>
             <div style={{ ...styles.tlFill, width: nowPos + "%" }} />
-            {vacances.slice(0, -1).map((v) => {
-              const ps = toPos(v.debut);
-              const pe = toPos(v.fin);
+            {vacances.map((v) => {
+              const ps = toPos(v.debut, mode);
+              const pe = toPos(v.fin, mode);
               return (
                 <div key={v.label}>
                   <div style={{
@@ -201,11 +219,13 @@ export default function SchoolYearProgress() {
           ) : (
             <div style={{ ...styles.nextVac, background: "rgba(83,74,183,0.18)" }}>
               <div style={styles.nextLeft}>
-                <span style={styles.nextName}>Vacances d'été 🎉</span>
+                <span style={styles.nextName}>{mode === "lycee" ? "Fin des cours 🎓" : "Vacances d'été 🎉"}</span>
                 <span style={styles.nextPhrase}>C'est bientôt fini !</span>
               </div>
               <div style={styles.nextRight}>
-                <div style={{ ...styles.nextDays, color: "#534AB7" }}>0</div>
+                <div style={{ ...styles.nextDays, color: "#534AB7" }}>
+                  {Math.ceil(Math.max(ENDS[mode] - new Date(), 0) / (1000 * 60 * 60 * 24))}
+                </div>
                 <div style={styles.nextDaysLabel}>jours</div>
               </div>
             </div>
@@ -236,22 +256,43 @@ const styles = {
     border: "0.5px solid rgba(255,255,255,0.12)",
     borderTop: "0.5px solid rgba(255,255,255,0.22)",
     borderRadius: 22,
-    padding: "2rem 1.75rem 1.5rem",
+    padding: "1.5rem 1.5rem",
     width: "100%", maxWidth: 480, color: "#fff",
   },
-  cardHeader: {
-    display: "flex", alignItems: "center", justifyContent: "center",
-    position: "relative", marginBottom: "0.2rem",
+  modeSwitcher: {
+    display: "flex",
+    background: "rgba(255,255,255,0.06)",
+    border: "0.5px solid rgba(255,255,255,0.12)",
+    borderRadius: 14,
+    padding: 4,
+    marginBottom: "1.25rem",
+    gap: 4,
   },
-  h1: { fontSize: 18, fontWeight: 500, textAlign: "center", color: "#fff", margin: 0 },
+  modeOpt: {
+    flex: 1, textAlign: "center",
+    fontSize: 13, fontWeight: 500,
+    color: "rgba(255,255,255,0.4)",
+    padding: "8px 0",
+    borderRadius: 10,
+    cursor: "pointer",
+    userSelect: "none",
+  },
+  modeOptActive: {
+    background: "rgba(255,255,255,0.14)",
+    color: "#fff",
+  },
+  cardHeader: {
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    marginBottom: "0.2rem", gap: 8,
+  },
+  h1: { fontSize: 16, fontWeight: 500, color: "#fff", margin: 0, flex: 1 },
   zoneBtn: {
-    position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)",
     background: "rgba(255,255,255,0.08)",
     border: "0.5px solid rgba(255,255,255,0.18)",
     borderRadius: 20,
     padding: "4px 6px",
     display: "flex", gap: 2,
-    cursor: "pointer",
+    flexShrink: 0,
   },
   zoneOpt: {
     fontSize: 11, fontWeight: 500,
@@ -265,12 +306,12 @@ const styles = {
     background: "rgba(255,255,255,0.15)",
     color: "#fff",
   },
-  motivation: { textAlign: "center", fontSize: 13, color: "rgba(255,255,255,0.5)", margin: "0 0 1.25rem", minHeight: 18 },
+  motivation: { textAlign: "center", fontSize: 13, color: "rgba(255,255,255,0.5)", margin: "0 0 1rem", minHeight: 18 },
   track: { background: "rgba(255,255,255,0.08)", borderRadius: 999, height: 12, overflow: "hidden", margin: "0.5rem 0 0.25rem" },
   fill: { height: "100%", borderRadius: 999, transition: "width 0.6s ease, background 1s ease" },
   pct: { fontSize: 34, fontWeight: 500, color: "#fff", textAlign: "center", margin: "0.75rem 0 0" },
   pctSub: { fontSize: 12, color: "rgba(255,255,255,0.4)", textAlign: "center", margin: "0 0 1rem" },
-  countdown: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, margin: "1rem 0" },
+  countdown: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, margin: "1rem 0" },
   cdBox: {
     background: "rgba(255,255,255,0.06)",
     border: "0.5px solid rgba(255,255,255,0.1)",
@@ -278,8 +319,8 @@ const styles = {
     borderRadius: 12, padding: "0.6rem 0.4rem", textAlign: "center",
     display: "flex", flexDirection: "column", alignItems: "center",
   },
-  cdVal: { fontSize: 22, fontWeight: 500, color: "#fff" },
-  cdLabel: { fontSize: 10, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.05em" },
+  cdVal: { fontSize: 20, fontWeight: 500, color: "#fff" },
+  cdLabel: { fontSize: 9, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.05em" },
   sectionSep: { borderTop: "0.5px solid rgba(255,255,255,0.08)", marginTop: "1.25rem", paddingTop: "1rem" },
   secTitle: { fontSize: 11, color: "rgba(255,255,255,0.35)", margin: "0 0 0.6rem", textTransform: "uppercase", letterSpacing: "0.05em" },
   timeline: { position: "relative", height: 6, background: "rgba(255,255,255,0.08)", borderRadius: 999, margin: "0.4rem 0 1.8rem" },
@@ -296,4 +337,3 @@ const styles = {
   nextDays: { fontSize: 28, fontWeight: 500, lineHeight: 1 },
   nextDaysLabel: { fontSize: 10, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.05em" },
 };
-// rebuild

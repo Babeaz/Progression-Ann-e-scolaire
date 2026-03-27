@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { Analytics } from "@vercel/analytics/react";
 
 const START = new Date("2025-09-01T08:00:00");
 const ENDS = {
@@ -105,7 +106,9 @@ export default function SchoolYearProgress() {
   const vacances = ZONES[zone];
 
   return (
-    <div style={styles.bg}>
+    <>
+      <Analytics />
+      <div style={styles.bg}>
       <div style={{ ...styles.blob, width:"70%", height:"70%", top:"-10%", left:"-10%", background:"radial-gradient(ellipse,rgba(83,74,183,0.75) 0%,transparent 70%)" }} />
       <div style={{ ...styles.blob, width:"60%", height:"60%", bottom:"-10%", right:"-5%", background:"radial-gradient(ellipse,rgba(29,158,117,0.65) 0%,transparent 70%)" }} />
       <div style={{ ...styles.blob, width:"50%", height:"50%", top:"10%", right:"10%", background:"radial-gradient(ellipse,rgba(55,138,221,0.5) 0%,transparent 70%)" }} />
@@ -234,6 +237,7 @@ export default function SchoolYearProgress() {
 
       </div>
     </div>
+    </>
   );
 }
 

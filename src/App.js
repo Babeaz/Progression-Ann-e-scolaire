@@ -1,29 +1,29 @@
 import { useEffect, useState, useCallback } from "react";
 
-const START = new Date("2025-09-01T08:00:00");
+const START = new Date("2026-09-01T08:00:00");
 const ENDS = {
-  college: new Date("2026-07-04T00:00:00"),
-  lycee:   new Date("2026-06-05T18:00:00"),
+  college: new Date("2027-07-03T00:00:00"),
+  lycee:   new Date("2027-07-03T00:00:00"),
 };
 
 const ZONES = {
   A: [
-    { label: "Toussaint", debut: new Date("2025-10-18"), fin: new Date("2025-11-03"), color: "#EF9F27" },
-    { label: "Noël",      debut: new Date("2025-12-20"), fin: new Date("2026-01-05"), color: "#378ADD" },
-    { label: "Hiver",     debut: new Date("2026-02-14"), fin: new Date("2026-03-02"), color: "#5DCAA5" },
-    { label: "Printemps", debut: new Date("2026-04-04"), fin: new Date("2026-04-20"), color: "#D4537E" },
+    { label: "Toussaint", debut: new Date("2026-10-17"), fin: new Date("2026-11-02"), color: "#EF9F27" },
+    { label: "Noël",      debut: new Date("2026-12-19"), fin: new Date("2027-01-04"), color: "#378ADD" },
+    { label: "Hiver",     debut: new Date("2027-02-13"), fin: new Date("2027-03-01"), color: "#5DCAA5" },
+    { label: "Printemps", debut: new Date("2027-04-10"), fin: new Date("2027-04-26"), color: "#D4537E" },
   ],
   B: [
-    { label: "Toussaint", debut: new Date("2025-10-18"), fin: new Date("2025-11-03"), color: "#EF9F27" },
-    { label: "Noël",      debut: new Date("2025-12-20"), fin: new Date("2026-01-05"), color: "#378ADD" },
-    { label: "Hiver",     debut: new Date("2026-02-21"), fin: new Date("2026-03-09"), color: "#5DCAA5" },
-    { label: "Printemps", debut: new Date("2026-04-11"), fin: new Date("2026-04-27"), color: "#D4537E" },
+    { label: "Toussaint", debut: new Date("2026-10-17"), fin: new Date("2026-11-02"), color: "#EF9F27" },
+    { label: "Noël",      debut: new Date("2026-12-19"), fin: new Date("2027-01-04"), color: "#378ADD" },
+    { label: "Hiver",     debut: new Date("2027-02-20"), fin: new Date("2027-03-08"), color: "#5DCAA5" },
+    { label: "Printemps", debut: new Date("2027-04-17"), fin: new Date("2027-05-03"), color: "#D4537E" },
   ],
   C: [
-    { label: "Toussaint", debut: new Date("2025-10-18"), fin: new Date("2025-11-03"), color: "#EF9F27" },
-    { label: "Noël",      debut: new Date("2025-12-20"), fin: new Date("2026-01-05"), color: "#378ADD" },
-    { label: "Hiver",     debut: new Date("2026-02-07"), fin: new Date("2026-02-23"), color: "#5DCAA5" },
-    { label: "Printemps", debut: new Date("2026-04-18"), fin: new Date("2026-05-04"), color: "#D4537E" },
+    { label: "Toussaint", debut: new Date("2026-10-17"), fin: new Date("2026-11-02"), color: "#EF9F27" },
+    { label: "Noël",      debut: new Date("2026-12-19"), fin: new Date("2027-01-04"), color: "#378ADD" },
+    { label: "Hiver",     debut: new Date("2027-02-06"), fin: new Date("2027-02-22"), color: "#5DCAA5" },
+    { label: "Printemps", debut: new Date("2027-04-03"), fin: new Date("2027-04-19"), color: "#D4537E" },
   ],
 };
 

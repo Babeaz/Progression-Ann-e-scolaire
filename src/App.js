@@ -3,7 +3,10 @@ import { useEffect, useState, useCallback } from "react";
 const START = new Date("2026-09-01T08:00:00");
 const ENDS = {
   college: new Date("2027-07-03T00:00:00"),
-  lycee:   new Date("2027-07-03T00:00:00"),
+  seconde:   new Date("2027-07-03T00:00:00"),
+  premiere:  new Date("2027-07-03T00:00:00"),
+  // Terminale : cours "normaux" jusqu'à la veille de l'épreuve de philo (bac 2027)
+  terminale: new Date("2027-06-13T00:00:00"),
 };
 
 const ZONES = {
@@ -74,7 +77,9 @@ function getNextVac(now, zone) {
 }
 
 export default function SchoolYearProgress() {
-  const [mode, setMode] = useState("college");
+  const [level, setLevel] = useState("college"); // "college" | "lycee"
+  const [grade, setGrade] = useState("seconde");  // "seconde" | "premiere" | "terminale"
+  const mode = level === "college" ? "college" : grade;
   const [zone, setZone] = useState("A");
   const [pct, setPct]   = useState(0);
   const [time, setTime] = useState({ j: 0, h: "00", m: "00", s: "00" });
@@ -121,13 +126,32 @@ export default function SchoolYearProgress() {
           ].map(({ key, label }) => (
             <div
               key={key}
-              onClick={() => setMode(key)}
-              style={{ ...styles.modeOpt, ...(mode === key ? styles.modeOptActive : {}) }}
+              onClick={() => setLevel(key)}
+              style={{ ...styles.modeOpt, ...(level === key ? styles.modeOptActive : {}) }}
             >
               {label}
             </div>
           ))}
         </div>
+
+        {/* Sous-switcher des classes (lycée uniquement) */}
+        {level === "lycee" && (
+          <div style={styles.gradeSwitcher}>
+            {[
+              { key: "seconde",   label: "Seconde" },
+              { key: "premiere",  label: "Première" },
+              { key: "terminale", label: "Terminale" },
+            ].map(({ key, label }) => (
+              <div
+                key={key}
+                onClick={() => setGrade(key)}
+                style={{ ...styles.gradeOpt, ...(grade === key ? styles.gradeOptActive : {}) }}
+              >
+                {label}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Header avec sélecteur de zone */}
         <div style={styles.cardHeader}>
@@ -152,7 +176,11 @@ export default function SchoolYearProgress() {
           <div style={{ ...styles.fill, width: pct.toFixed(2) + "%", background: getColor(pct) }} />
         </div>
         <p style={styles.pct}>{pct.toFixed(4)} %</p>
-        <p style={styles.pctSub}>{mode === "lycee" ? "des cours écoulés" : "de l'année écoulée"}</p>
+        <p style={styles.pctSub}>
+          {level === "lycee"
+            ? `des cours écoulés — ${{ seconde: "Seconde", premiere: "Première", terminale: "Terminale" }[grade]}`
+            : "de l'année écoulée"}
+        </p>
 
         {/* Countdown */}
         <div style={styles.countdown}>
@@ -219,7 +247,7 @@ export default function SchoolYearProgress() {
           ) : (
             <div style={{ ...styles.nextVac, background: "rgba(83,74,183,0.18)" }}>
               <div style={styles.nextLeft}>
-                <span style={styles.nextName}>{mode === "lycee" ? "Fin des cours 🎓" : "Vacances d'été 🎉"}</span>
+                <span style={styles.nextName}>{level === "lycee" && grade === "terminale" ? "Début des épreuves 🎓" : level === "lycee" ? "Fin des cours 🎓" : "Vacances d'été 🎉"}</span>
                 <span style={styles.nextPhrase}>C'est bientôt fini !</span>
               </div>
               <div style={styles.nextRight}>
@@ -279,6 +307,28 @@ const styles = {
   },
   modeOptActive: {
     background: "rgba(255,255,255,0.14)",
+    color: "#fff",
+  },
+  gradeSwitcher: {
+    display: "flex",
+    background: "rgba(255,255,255,0.04)",
+    border: "0.5px solid rgba(255,255,255,0.08)",
+    borderRadius: 12,
+    padding: 3,
+    marginBottom: "1.25rem",
+    gap: 3,
+  },
+  gradeOpt: {
+    flex: 1, textAlign: "center",
+    fontSize: 11.5, fontWeight: 500,
+    color: "rgba(255,255,255,0.35)",
+    padding: "6px 0",
+    borderRadius: 8,
+    cursor: "pointer",
+    userSelect: "none",
+  },
+  gradeOptActive: {
+    background: "rgba(255,255,255,0.12)",
     color: "#fff",
   },
   cardHeader: {
